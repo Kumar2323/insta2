@@ -1,6 +1,8 @@
 import os
 import requests
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters
+
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
 BOT_TOKEN = '7114731765:AAGmTqB72nH0LK16y3DML0ryWrVU0HyR5ac'
