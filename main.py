@@ -55,7 +55,7 @@ def main():
     start_handler = CommandHandler('start', start)
     dispatcher.add_handler(start_handler)
 
-    media_handler = MessageHandler(filters.text & ~filters.command, download_media)
+    media_handler = MessageHandler(Filters.text & ~Filters.command, download_media)
     dispatcher.add_handler(media_handler)
 
     updater.start_polling()
