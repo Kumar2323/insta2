@@ -1,65 +1,97 @@
-import os
-import requests
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from pyrogram import Client, filters
+from datetime import datetime
+import os,subprocess
+import time
+import pytz
 
+app = Client("EenaduPapers",
+             api_id=23933217,
+             api_hash="9295ff05232442f3dbb48beb8698b5ed",
+             bot_token="6044902922:AAE9EaEHAt80YUWEvvy74rU0JzL8KdaUXRs",
+             workers=50,
+             max_concurrent_transmissions=20
+             )
+@app.on_message(filters.command('post'))
+async def post(bot,message):
+    chat_id=message.chat.id
+    user_id=message.from_user.id
+    msg_id = message.id
+    tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(tz)
+    msg = await bot.send_message(message.from_user.id,'Getting All Papers',reply_to_message_id=message.id)
+    date = now.strftime("%d-%m-%Y")
+    subprocess.run(['python','eenadu.py'])
+    await msg.edit("Uploading Papers to Telegram Channel")
+    await bot.send_document("-1001532850156",f"Mains/Eenadu_TG {date}.pdf")
+    await bot.send_document("-1001532850156",f"Mains/Eenadu_AP {date}.pdf")
+    await bot.send_document("-1001532850156",f"Mains/Eenadu_GHYD {date}.pdf")
+    await msg.edit("Done Uploading....")
+    
+@app.on_message(filters.command('ap'))
+async def post(bot,message):
+    chat_id=message.chat.id
+    user_id=message.from_user.id
+    msg_id = message.id
+    tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(tz)
+    msg = await bot.send_message(message.from_user.id,'Getting All AP State Papers',reply_to_message_id=message.id)
+    date = now.strftime("%Y-%m-%d")
+    subprocess.run(['python','ap.py'])
+    folder_path = "apdist"
+    await bot.send_message("-1001532850156","AP District Papers")
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        
 
-
-# Replace 'YOUR_BOT_TOKEN' with your actual bot token
-BOT_TOKEN = '7114731765:AAGmTqB72nH0LK16y3DML0ryWrVU0HyR5ac'
-
-def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Welcome to the Instagram Downloader Bot! Send me an Instagram post URL and I'll download the media for you.")
-
-def download_media(update, context):
-    url = update.message.text
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        # Extract the media URL from the Instagram page
-        media_url = extract_media_url(response.text)
-
-        if media_url:
-            # Download the media
-            media_response = requests.get(media_url)
-            if media_response.status_code == 200:
-                # Save the media to a file
-                file_name = f"instagram_media_{update.message.message_id}.jpg"
-                with open(file_name, 'wb') as file:
-                    file.write(media_response.content)
-
-                # Send the downloaded media to the user
-                context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_name, 'rb'))
-
-                # Delete the temporary file
-                os.remove(file_name)
-            else:
-                context.bot.send_message(chat_id=update.effective_chat.id, text="Failed to download the media.")
-        else:
-            context.bot.send_message(chat_id=update.effective_chat.id, text="No media found in the provided URL.")
-    else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Invalid Instagram URL.")
-
-def extract_media_url(html):
-    # Extract the media URL from the HTML using string manipulation or regular expressions
-    # This is a simplified example and may not work for all Instagram pages
-    start_index = html.find('meta property="og:image" content="') + len('meta property="og:image" content="')
-    end_index = html.find('"', start_index)
-    media_url = html[start_index:end_index]
-    return media_url
-
-def main():
-    updater = Updater(token=BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-
-    start_handler = CommandHandler('start', start)
-    dispatcher.add_handler(start_handler)
-
-    media_handler = MessageHandler(Filters.text & ~Filters.command, download_media)
-    dispatcher.add_handler(media_handler)
-
-    updater.start_polling()
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
+        await bot.send_document("-1001532850156",file_path)
+        time.sleep(0.75)
+    os.rmdir("apdist")         
+    await msg.edit("Done Uploading....")
+              
+              
+@app.on_message(filters.command('ts'))
+async def post(bot,message):
+    chat_id=message.chat.id
+    user_id=message.from_user.id
+    msg_id = message.id
+    tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(tz)
+    msg = await bot.send_message(message.from_user.id,'Getting All TS State Papers',reply_to_message_id=message.id)
+    date = now.strftime("%Y-%m-%d")
+    subprocess.run(['python','ts.py'])
+    folder_path = "tsdist"
+    await bot.send_message("-1001532850156","TSDistrict Papers")
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        
+        await bot.send_document("-1001532850156",file_path)
+        time.sleep(0.75)      
+    os.rmdir("tsdist")
+    await msg.edit("Done Uploading....")
+    
+@app.on_message(filters.command('sun'))
+async def post(bot,message):
+    chat_id=message.chat.id
+    user_id=message.from_user.id
+    msg_id = message.id
+    tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(tz)
+    msg = await bot.send_message(message.from_user.id,'Getting Sunday Papers',reply_to_message_id=message.id)
+    date = now.strftime("%d-%m-%Y")
+    subprocess.run(['python','sun.py'])
+    folder_path = 'Sunday'
+   # try:
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        
+        await bot.send_document("-1001532850156",file_path)
+        
+    await msg.edit("Done Uploading....")
+    os.rmdir("Sunday")
+    #except:
+      
+     # await msg.edit("Papers Not Found")
+    
+    
+    
+app.run()
